@@ -1,5 +1,3 @@
-# Focus Flow ⏱️
-
 <div align="center">
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=ffffff&height=200&section=header&text=Focus%20Flow&fontSize=50&fontColor=000&animation=twinkling&fontAlignY=40&desc=Minimalist%20Pomodoro%20|%20Ambient%20Sounds%20|%20Task%20Management&descAlignY=60&descSize=18">
