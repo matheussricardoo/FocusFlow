@@ -31,7 +31,7 @@ To run this project locally, you'll need Node.js and npm installed.
 
 ```bash
 # Clone the repository
-git clone <https://github.com/matheussricardoo/FocusFlow.git>
+git clone https://github.com/matheussricardoo/FocusFlow.git
 
 # Navigate to project directory
 cd focus-flow
