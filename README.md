@@ -1,108 +1,84 @@
 <div align="center">
 
-<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=ffffff&height=200&section=header&text=Focus%20Flow&fontSize=50&fontColor=000&animation=twinkling&fontAlignY=40&desc=Minimalist%20Pomodoro%20|%20Ambient%20Sounds%20|%20Task%20Management&descAlignY=60&descSize=18">
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=ffffff&height=200&section=header&text=Focus%20Flow&fontSize=50&fontColor=000&animation=twinkling&fontAlignY=40&desc=A%20Pomodoro%20app%20to%20maximize%20your%20productivity.&descAlignY=60&descSize=18">
 
 <p align="center">
-  <i>⏱️ A minimalist and elegant Pomodoro timer with ambient sounds, task management, and productivity tracking.</i>
-</p>
-
-<p align="center">
-  <i>⏱️ Um temporizador Pomodoro minimalista e elegante com sons ambientes, gerenciamento de tarefas e acompanhamento de produtividade.</i>
+  <i>⏱️ A minimalist and elegant Pomodoro timer with ambient sounds, task management, and productivity tracking, built with Next.js and ShadCN/UI.</i>
 </p>
 
 ---
 
-### 🌟 Features | Funcionalidades
+### 🌟 Features
 
 <div align="center">
 
-|  Feature  | Description | Descrição |
-|:---------:|:------------|:----------|
-| 🎨 | Minimalist black & white design | Design minimalista em preto e branco |
-| 🎵 | Ambient sounds | Sons ambientes |
-| 📝 | Task management | Gerenciamento de tarefas |
-| 🌐 | Bilingual support (EN/PT) | Suporte bilíngue (EN/PT) |
-| 🔕 | Do Not Disturb mode | Modo Não Perturbe |
-| 📊 | Productivity statistics | Estatísticas de produtividade |
-| ⚡ | Customizable intervals | Intervalos personalizáveis |
+| Feature | Description |
+|:---:|:---|
+| 🎨 | Modern and minimalist design |
+| 🎵 | Ambient sounds (Forest, Cavern, Rain) |
+| 📝 | Task management (Add, edit, delete, complete) |
+| 📊 | Productivity dashboard with statistics |
+| ⚡ | Customizable intervals for focus and breaks |
+| 🚀 | Auto-start next timer option |
+| 🔊 | Volume control for ambient sounds |
+| 🖥️ | Fullscreen mode for focus without distractions |
 
 </div>
 
-### 🎵 Ambient Sounds | Sons Ambientes
+### 🚀 Getting Started
 
-<div align="center">
-
-| Sound | Description | Descrição |
-|:-----:|:------------|:----------|
-| 🌳 | Forest | Floresta |
-| 🌧️ | Rain | Chuva |
-| 🕯️ | Cavern | Caverna |
-
-</div>
-
-### ⚙️ Settings | Configurações
-
-<div align="center">
-
-| Setting | Description | Descrição |
-|:-------:|:------------|:----------|
-| ⏱️ | Focus time | Tempo de foco |
-| 💤 | Break time | Tempo de pausa |
-| 🔊 | Sound volume | Volume do som |
-| 🔕 | Do Not Disturb | Não Perturbe |
-
-</div>
-
-### 📊 Statistics | Estatísticas
-
-<div align="center">
-
-| Stat | Description | Descrição |
-|:----:|:------------|:----------|
-| 🎯 | Completed sessions | Sessões completadas |
-| ⏰ | Total focus time | Tempo total focado |
-| ✅ | Completed tasks | Tarefas concluídas |
-
-</div>
-
-### 🚀 Getting Started | Começando
+To run this project locally, you'll need Node.js and npm installed.
 
 ```bash
-# Clone the repository | Clone o repositório
-git clone https://github.com/matheussricardoo/focus-flow.git
+# Clone the repository
+git clone <https://github.com/matheussricardoo/FocusFlow.git>
 
-# Navigate to project directory | Navegue até o diretório do projeto
+# Navigate to project directory
 cd focus-flow
 
-# Open in browser | Abra no navegador
-open index.html
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
 ```
 
-### 📁 Project Structure | Estrutura do Projeto
+### 🛠️ Technologies
+
+This project is built with modern web technologies to provide a fast and beautiful user experience.
+
+<div align="center">
+
+<a href="https://nextjs.org/"><img src="https://skillicons.dev/icons?i=nextjs" alt="Next.js"/></a>
+<a href="https://react.dev/"><img src="https://skillicons.dev/icons?i=react" alt="React"/></a>
+<a href="https://www.typescriptlang.org/"><img src="https://skillicons.dev/icons?i=ts" alt="TypeScript"/></a>
+<a href="https://tailwindcss.com/"><img src="https://skillicons.dev/icons?i=tailwind" alt="Tailwind CSS"/></a>
+<a href="https://ui.shadcn.com/"><img src="https://skillicons.dev/icons?i=shadcn" alt="ShadCN/UI"/></a>
+
+</div>
+
+### 📁 Project Structure
+
+The project follows the standard Next.js App Router structure.
 
 ```
 focus-flow/
-├── index.html
-├── styles.css
-├── pomodoro.js
-└── sounds/
-    ├── forest.wav
-    ├── rain.wav
-    ├── cavern.wav
-    └── melodical.wav
+├── src/
+│   ├── app/
+│   │   ├── page.tsx         # Main page
+│   │   └── layout.tsx       # Root layout
+│   ├── components/
+│   │   ├── focus-flow-app.tsx # Main application component
+│   │   └── ui/              # ShadCN UI components
+│   └── lib/
+│       ├── types.ts         # TypeScript types
+│       └── utils.ts         # Utility functions
+├── public/                  # Static assets
+├── package.json
+└── tailwind.config.ts
 ```
 
-### 🛠️ Technologies | Tecnologias
-
-<div align="center">
-
-<a href="https://developer.mozilla.org/en-US/docs/Web/HTML"><img src="https://skillicons.dev/icons?i=html" alt="HTML5"/></a>
-  <a href="https://developer.mozilla.org/en-US/docs/Web/CSS"><img src="https://skillicons.dev/icons?i=css" alt="CSS3"/></a>
-   <a href="https://www.javascript.com/"><img src="https://skillicons.dev/icons?i=js" alt="JavaScript"/></a>
-
-</div>
-
-### 👤 Author | Autor
+### 👤 Author
 
 <div align="center">
   <a href="https://github.com/matheussricardoo" target="_blank">
@@ -113,11 +89,9 @@ focus-flow/
   </a>
 </div>
 
-### 📄 License | Licença
+### 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-Este projeto está licenciado sob a Licença MIT - consulte o arquivo [LICENSE](LICENSE) para obter detalhes.
+This project is licensed under the MIT License.
 
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=ffffff&height=120&section=footer"/>
 
