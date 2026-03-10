@@ -3,29 +3,29 @@
 <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&color=ffffff&height=200&section=header&text=Focus%20Flow&fontSize=50&fontColor=000&animation=twinkling&fontAlignY=40&desc=A%20Pomodoro%20app%20to%20maximize%20your%20productivity.&descAlignY=60&descSize=18">
 
 <p align="center">
-  <i>⏱️ A minimalist and elegant Pomodoro timer with ambient sounds, task management, and productivity tracking, built with Next.js and ShadCN/UI.</i>
+  <i>A minimalist and elegant Pomodoro timer with ambient sounds, task management, and productivity tracking, built with Next.js and ShadCN/UI.</i>
 </p>
 
 ---
 
-### 🌟 Features
+### Features
 
 <div align="center">
 
 | Feature | Description |
 |:---:|:---|
-| 🎨 | Modern and minimalist design |
-| 🎵 | Ambient sounds (Forest, Cavern, Rain) |
-| 📝 | Task management (Add, edit, delete, complete) |
-| 📊 | Productivity dashboard with statistics |
-| ⚡ | Customizable intervals for focus and breaks |
-| 🚀 | Auto-start next timer option |
-| 🔊 | Volume control for ambient sounds |
-| 🖥️ | Fullscreen mode for focus without distractions |
+| Design | Modern and minimalist design |
+| Ambient sounds | Ambient sounds (Forest, Cavern, Rain) |
+| Task management | Task management (Add, edit, delete, complete) |
+| Productivity dashboard | Productivity dashboard with statistics |
+| Custom intervals | Customizable intervals for focus and breaks |
+| Auto-start | Auto-start next timer option |
+| Volume control | Volume control for ambient sounds |
+| Fullscreen mode | Fullscreen mode for focus without distractions |
 
 </div>
 
-### 🚀 Getting Started
+### Getting Started
 
 To run this project locally, you'll need Node.js and npm installed.
 
@@ -43,7 +43,7 @@ npm install
 npm run dev
 ```
 
-### 🛠️ Technologies
+### Technologies
 
 This project is built with modern web technologies to provide a fast and beautiful user experience.
 
@@ -57,7 +57,7 @@ This project is built with modern web technologies to provide a fast and beautif
 
 </div>
 
-### 📁 Project Structure
+### Project Structure
 
 The project follows the standard Next.js App Router structure.
 
@@ -78,7 +78,7 @@ focus-flow/
 └── tailwind.config.ts
 ```
 
-### 👤 Author
+### Author
 
 <div align="center">
   <a href="https://github.com/matheussricardoo" target="_blank">
@@ -89,7 +89,7 @@ focus-flow/
   </a>
 </div>
 
-### 📄 License
+### License
 
 This project is licensed under the MIT License.
 
