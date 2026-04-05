@@ -1,4 +1,4 @@
-use crate::app::AppSettings;
+use crate::app::{play_beep, AppSettings};
 use leptos::*;
 
 #[component]
@@ -14,6 +14,7 @@ where
     let (temp_notifications, set_temp_notifications) =
         create_signal(settings.notifications_enabled.get());
     let (temp_sound, set_temp_sound) = create_signal(settings.sound_enabled.get());
+    let (temp_sound_volume, set_temp_sound_volume) = create_signal(settings.sound_volume.get());
     let (temp_auto_start, set_temp_auto_start) = create_signal(settings.auto_start_next.get());
 
     let cancel = on_close.clone();
@@ -24,6 +25,7 @@ where
         settings.total_rounds.set(temp_rounds.get());
         settings.notifications_enabled.set(temp_notifications.get());
         settings.sound_enabled.set(temp_sound.get());
+        settings.sound_volume.set(temp_sound_volume.get());
         settings.auto_start_next.set(temp_auto_start.get());
         on_close();
     };
@@ -78,6 +80,28 @@ where
                                    prop:checked=temp_sound />
                             <span class="slider"></span>
                         </label>
+                    </div>
+                </div>
+
+                <div class="input-group volume-group">
+                    <div class="volume-header">
+                        <span class="toggle-label">"SOUND VOLUME"</span>
+                        <span class="volume-value">
+                            {move || format!("{:.0}%", temp_sound_volume.get() * 100.0)}
+                        </span>
+                    </div>
+                    <input class="volume-slider" type="range"
+                           min="0" max="1" step="0.05"
+                           on:input=move |ev| if let Ok(v) = event_target_value(&ev).parse() { set_temp_sound_volume.set(v) }
+                           prop:value=temp_sound_volume
+                           prop:disabled=move || !temp_sound.get() />
+                    <div class="volume-actions">
+                        <button class="btn btn-secondary btn-compact"
+                                type="button"
+                                prop:disabled=move || !temp_sound.get()
+                                on:click=move |_| if temp_sound.get() { play_beep(temp_sound_volume.get()); }>
+                            "TEST SOUND"
+                        </button>
                     </div>
                 </div>
 

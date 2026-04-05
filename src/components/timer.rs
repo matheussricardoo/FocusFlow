@@ -1,10 +1,11 @@
-use crate::app::{AppProjects, AppSettings, AppTimer};
+use crate::app::{AppProjects, AppSettings, AppStats, AppTimer};
 use leptos::*;
 
 #[component]
 pub fn Timer() -> impl IntoView {
     let settings = use_context::<AppSettings>().expect("AppSettings missed");
     let projects_ctx = use_context::<AppProjects>().expect("AppProjects missed");
+    let stats_ctx = use_context::<AppStats>().expect("AppStats missed");
     let timer = use_context::<AppTimer>().expect("AppTimer missed");
 
     let toggle_timer = move |_| {
@@ -16,6 +17,7 @@ pub fn Timer() -> impl IntoView {
             let secs = timer.time_remaining.get().max(1) as f64;
             timer.target_end_ms.set(Some(now + secs * 1000.0));
             timer.is_running.set(true);
+            timer.has_started.set(true);
         }
     };
 
@@ -66,6 +68,9 @@ pub fn Timer() -> impl IntoView {
                         {move || if settings.auto_start_next.get() { "AUTO ON" } else { "AUTO OFF" }}
                     </span>
                 </div>
+                <Show when=move || { stats_ctx.daily_count.get() >= settings.total_rounds.get() } fallback=|| ()>
+                    <div class="goal-met-indicator">"DAILY GOAL MET"</div>
+                </Show>
 
                 <div class="task-title">
                     {move || {

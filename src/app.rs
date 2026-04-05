@@ -6,7 +6,7 @@ use gloo_storage::{LocalStorage, Storage};
 use js_sys::Date;
 use leptos::*;
 use serde::{Deserialize, Serialize};
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{window, Notification};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -40,6 +40,7 @@ pub struct PersistedSettings {
     pub total_rounds: u32,
     pub notifications_enabled: bool,
     pub sound_enabled: bool,
+    pub sound_volume: f64,
     pub auto_start_next: bool,
 }
 
@@ -51,6 +52,7 @@ impl Default for PersistedSettings {
             total_rounds: 4,
             notifications_enabled: true,
             sound_enabled: true,
+            sound_volume: 1.0,
             auto_start_next: false,
         }
     }
@@ -63,6 +65,39 @@ pub struct PersistedTimerState {
     pub is_focus: bool,
     pub current_round: u32,
     pub target_end_ms: Option<f64>,
+    #[serde(default)]
+    pub has_started: bool,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DayCount {
+    pub date: String,
+    pub count: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(default)]
+pub struct PersistedStats {
+    pub daily_count: u32,
+    pub daily_date: String,
+    pub streak_count: u32,
+    pub last_completed_date: Option<String>,
+    pub weekly: Vec<DayCount>,
+    pub total_focus_sessions: u32,
+}
+
+impl Default for PersistedStats {
+    fn default() -> Self {
+        let today = current_date_key();
+        Self {
+            daily_count: 0,
+            daily_date: today,
+            streak_count: 0,
+            last_completed_date: None,
+            weekly: build_weekly(&[]),
+            total_focus_sessions: 0,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -72,6 +107,7 @@ pub struct AppSettings {
     pub total_rounds: RwSignal<u32>,
     pub notifications_enabled: RwSignal<bool>,
     pub sound_enabled: RwSignal<bool>,
+    pub sound_volume: RwSignal<f64>,
     pub auto_start_next: RwSignal<bool>,
 }
 
@@ -88,10 +124,108 @@ pub struct AppTimer {
     pub is_focus: RwSignal<bool>,
     pub current_round: RwSignal<u32>,
     pub target_end_ms: RwSignal<Option<f64>>,
+    pub has_started: RwSignal<bool>,
+}
+
+#[derive(Clone, Copy)]
+#[allow(dead_code)]
+pub struct AppStats {
+    pub daily_count: RwSignal<u32>,
+    pub daily_date: RwSignal<String>,
+    pub streak_count: RwSignal<u32>,
+    pub last_completed_date: RwSignal<Option<String>>,
+    pub weekly_counts: RwSignal<Vec<DayCount>>,
+    pub total_focus_sessions: RwSignal<u32>,
 }
 
 fn now_ms() -> f64 {
     Date::now()
+}
+
+fn date_key_from_ms(ms: f64) -> String {
+    let d = Date::new(&JsValue::from_f64(ms));
+    let year = d.get_full_year() as i32;
+    let month = (d.get_month() + 1) as i32;
+    let day = d.get_date() as i32;
+    format!("{:04}-{:02}-{:02}", year, month, day)
+}
+
+fn current_date_key() -> String {
+    date_key_from_ms(now_ms())
+}
+
+fn date_key_days_ago(days: u32) -> String {
+    date_key_from_ms(now_ms() - (days as f64) * 86_400_000.0)
+}
+
+fn yesterday_date_key() -> String {
+    date_key_days_ago(1)
+}
+
+fn build_weekly(weekly: &[DayCount]) -> Vec<DayCount> {
+    let mut out = Vec::new();
+    for i in (0..7).rev() {
+        let date = date_key_days_ago(i as u32);
+        let count = weekly
+            .iter()
+            .find(|d| d.date == date)
+            .map(|d| d.count)
+            .unwrap_or(0);
+        out.push(DayCount { date, count });
+    }
+    out
+}
+
+fn record_focus_completion(
+    daily_count: RwSignal<u32>,
+    daily_date: RwSignal<String>,
+    streak_count: RwSignal<u32>,
+    last_completed_date: RwSignal<Option<String>>,
+    weekly_counts: RwSignal<Vec<DayCount>>,
+    total_focus_sessions: RwSignal<u32>,
+) {
+    let today = current_date_key();
+
+    if daily_date.get_untracked() != today {
+        let yesterday = yesterday_date_key();
+        let last = last_completed_date.get_untracked();
+        if last.as_deref() != Some(&yesterday) {
+            streak_count.set(0);
+        }
+        daily_date.set(today.clone());
+        daily_count.set(0);
+        weekly_counts.update(|w| {
+            let rebuilt = build_weekly(w);
+            *w = rebuilt;
+        });
+    }
+
+    daily_count.update(|c| *c = c.saturating_add(1));
+    total_focus_sessions.update(|t| *t = t.saturating_add(1));
+
+    let last = last_completed_date.get_untracked();
+    if last.as_deref() != Some(&today) {
+        let yesterday = yesterday_date_key();
+        if last.as_deref() == Some(&yesterday) {
+            streak_count.update(|s| *s = s.saturating_add(1));
+        } else {
+            streak_count.set(1);
+        }
+        last_completed_date.set(Some(today.clone()));
+    }
+
+    weekly_counts.update(|w| {
+        if let Some(entry) = w.iter_mut().find(|d| d.date == today) {
+            entry.count = entry.count.saturating_add(1);
+        } else {
+            w.push(DayCount {
+                date: today.clone(),
+                count: 1,
+            });
+        }
+        let rebuilt = build_weekly(w);
+        *w = rebuilt;
+    });
 }
 
 fn focus_secs(settings: AppSettings) -> u32 {
@@ -126,7 +260,9 @@ fn show_timer_done_notification(is_focus_done: bool) {
     let _ = Notification::new_with_options(title, &opts);
 }
 
-fn play_beep() {
+pub fn play_beep(volume: f64) {
+    let volume = volume.clamp(0.0, 1.0);
+    let peak = 0.12 * volume.max(0.05);
     let Some(win) = window() else { return };
     let Ok(Some(audio_ctx_ctor)) = js_sys::Reflect::get(&win, &"AudioContext".into())
         .or_else(|_| js_sys::Reflect::get(&win, &"webkitAudioContext".into()))
@@ -213,7 +349,7 @@ fn play_beep() {
             js_sys::Reflect::get(&gain_param, &"exponentialRampToValueAtTime".into())
         {
             let args_up = js_sys::Array::new();
-            args_up.push(&0.08.into());
+            args_up.push(&peak.into());
             args_up.push(&(current_time + 0.02).into());
             let _ = js_sys::Reflect::apply(
                 exp_ramp.unchecked_ref::<js_sys::Function>(),
@@ -260,6 +396,7 @@ pub fn App() -> impl IntoView {
     let total_rounds = create_rw_signal(initial_settings.total_rounds);
     let notifications_enabled = create_rw_signal(initial_settings.notifications_enabled);
     let sound_enabled = create_rw_signal(initial_settings.sound_enabled);
+    let sound_volume = create_rw_signal(initial_settings.sound_volume);
     let auto_start_next = create_rw_signal(initial_settings.auto_start_next);
 
     let settings = AppSettings {
@@ -268,9 +405,82 @@ pub fn App() -> impl IntoView {
         total_rounds,
         notifications_enabled,
         sound_enabled,
+        sound_volume,
         auto_start_next,
     };
     provide_context(settings);
+
+    // Load Stats
+    let initial_stats: PersistedStats = LocalStorage::get("focusflow_stats").unwrap_or_default();
+    let today_key = current_date_key();
+    let mut normalized_stats = initial_stats;
+    if normalized_stats.daily_date != today_key {
+        let yesterday = yesterday_date_key();
+        if normalized_stats.last_completed_date.as_deref() != Some(&yesterday) {
+            normalized_stats.streak_count = 0;
+        }
+        normalized_stats.daily_date = today_key;
+        normalized_stats.daily_count = 0;
+    }
+    normalized_stats.weekly = build_weekly(&normalized_stats.weekly);
+
+    let daily_count = create_rw_signal(normalized_stats.daily_count);
+    let daily_date = create_rw_signal(normalized_stats.daily_date);
+    let streak_count = create_rw_signal(normalized_stats.streak_count);
+    let last_completed_date = create_rw_signal(normalized_stats.last_completed_date);
+    let weekly_counts = create_rw_signal(normalized_stats.weekly);
+    let total_focus_sessions = create_rw_signal(normalized_stats.total_focus_sessions);
+
+    let app_stats = AppStats {
+        daily_count,
+        daily_date,
+        streak_count,
+        last_completed_date,
+        weekly_counts,
+        total_focus_sessions,
+    };
+    provide_context(app_stats);
+
+    // Daily reset watcher
+    create_effect(move |_| {
+        let _handle = set_interval_with_handle(
+            move || {
+                let today = current_date_key();
+                if daily_date.get_untracked() != today {
+                    let yesterday = yesterday_date_key();
+                    let last = last_completed_date.get_untracked();
+                    if last.as_deref() != Some(&yesterday) {
+                        streak_count.set(0);
+                    }
+                    daily_date.set(today);
+                    daily_count.set(0);
+                    weekly_counts.update(|w| {
+                        let rebuilt = build_weekly(w);
+                        *w = rebuilt;
+                    });
+                }
+            },
+            std::time::Duration::from_secs(60),
+        )
+        .expect("Failed to set daily stats interval");
+
+        on_cleanup(move || {
+            _handle.clear();
+        });
+    });
+
+    // Save Stats
+    create_effect(move |_| {
+        let stats = PersistedStats {
+            daily_count: daily_count.get(),
+            daily_date: daily_date.get(),
+            streak_count: streak_count.get(),
+            last_completed_date: last_completed_date.get(),
+            weekly: weekly_counts.get(),
+            total_focus_sessions: total_focus_sessions.get(),
+        };
+        let _ = LocalStorage::set("focusflow_stats", stats);
+    });
 
     // Save Settings
     create_effect(move |_| {
@@ -279,6 +489,7 @@ pub fn App() -> impl IntoView {
         let r = total_rounds.get();
         let n = notifications_enabled.get();
         let s = sound_enabled.get();
+        let v = sound_volume.get();
         let a = auto_start_next.get();
         let _ = LocalStorage::set(
             "focusflow_settings",
@@ -288,6 +499,7 @@ pub fn App() -> impl IntoView {
                 total_rounds: r,
                 notifications_enabled: n,
                 sound_enabled: s,
+                sound_volume: v,
                 auto_start_next: a,
             },
         );
@@ -326,6 +538,7 @@ pub fn App() -> impl IntoView {
             is_focus: true,
             current_round: 1,
             target_end_ms: None,
+            has_started: false,
         });
 
     let time_remaining = create_rw_signal(initial_timer.time_remaining.max(1));
@@ -333,6 +546,7 @@ pub fn App() -> impl IntoView {
     let is_focus = create_rw_signal(initial_timer.is_focus);
     let current_round = create_rw_signal(initial_timer.current_round.max(1));
     let target_end_ms = create_rw_signal(initial_timer.target_end_ms);
+    let has_started = create_rw_signal(initial_timer.has_started || initial_timer.is_running);
 
     let timer = AppTimer {
         time_remaining,
@@ -340,11 +554,18 @@ pub fn App() -> impl IntoView {
         is_focus,
         current_round,
         target_end_ms,
+        has_started,
     };
     provide_context(timer);
 
     create_effect(move |_| {
         request_notification_permission_if_needed(settings.notifications_enabled.get());
+    });
+
+    create_effect(move |_| {
+        if is_running.get() {
+            has_started.set(true);
+        }
     });
 
     // Ensure timer is consistent when app restores from persisted running state
@@ -361,7 +582,18 @@ pub fn App() -> impl IntoView {
                         show_timer_done_notification(was_focus);
                     }
                     if settings.sound_enabled.get() {
-                        play_beep();
+                        play_beep(settings.sound_volume.get());
+                    }
+
+                    if was_focus {
+                        record_focus_completion(
+                            daily_count,
+                            daily_date,
+                            streak_count,
+                            last_completed_date,
+                            weekly_counts,
+                            total_focus_sessions,
+                        );
                     }
 
                     let next_secs = if was_focus {
@@ -413,7 +645,18 @@ pub fn App() -> impl IntoView {
                         show_timer_done_notification(was_focus);
                     }
                     if settings.sound_enabled.get() {
-                        play_beep();
+                        play_beep(settings.sound_volume.get());
+                    }
+
+                    if was_focus {
+                        record_focus_completion(
+                            daily_count,
+                            daily_date,
+                            streak_count,
+                            last_completed_date,
+                            weekly_counts,
+                            total_focus_sessions,
+                        );
                     }
 
                     let next_secs = if was_focus {
@@ -449,18 +692,18 @@ pub fn App() -> impl IntoView {
 
     // React to settings changes without hard-resetting a running timer
     create_effect(move |_| {
-        let _ = settings.focus_mins.get();
-        let _ = settings.break_mins.get();
+        let focus = settings.focus_mins.get();
+        let break_m = settings.break_mins.get();
 
-        if is_running.get() {
-            // Keep current countdown stable while running
+        if is_running.get_untracked() {
+            // Keep current countdown stable while running or paused
             return;
         }
 
-        let next = if is_focus.get() {
-            focus_secs(settings)
+        let next = if is_focus.get_untracked() {
+            focus.saturating_mul(60)
         } else {
-            break_secs(settings)
+            break_m.saturating_mul(60)
         };
         time_remaining.set(next.max(1));
         target_end_ms.set(None);
@@ -474,8 +717,33 @@ pub fn App() -> impl IntoView {
             is_focus: is_focus.get(),
             current_round: current_round.get(),
             target_end_ms: target_end_ms.get(),
+            has_started: has_started.get(),
         };
         let _ = LocalStorage::set("focusflow_timer", state);
+    });
+
+    // Update document title with timer and mode (running or paused)
+    create_effect(move |_| {
+        let Some(win) = window() else { return };
+        let Some(doc) = win.document() else { return };
+
+        if !has_started.get() {
+            doc.set_title("FocusFlow • Pomodoro");
+            return;
+        }
+
+        let secs = time_remaining.get();
+        let mode_or_state = if is_running.get() {
+            if is_focus.get() {
+                "Focus"
+            } else {
+                "Break"
+            }
+        } else {
+            "Paused"
+        };
+        let title = format!("{:02}:{:02} • {}", secs / 60, secs % 60, mode_or_state);
+        doc.set_title(&title);
     });
 
     let (active_tab, set_active_tab) = create_signal(Tab::Focus);
