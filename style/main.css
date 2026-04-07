@@ -9,6 +9,15 @@
     --transition: all 0.3s ease;
 }
 
+body[data-theme="dark"] {
+    --bg-color: #0f0f0f;
+    --text-main: #f2f2f2;
+    --text-muted: #a0a0a0;
+    --accent-gray: #1a1a1a;
+    --btn-gray: #1f1f1f;
+    --border-color: #2a2a2a;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -101,7 +110,7 @@ header {
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 3px;
-    color: #b0b0b0;
+    color: var(--text-muted);
 }
 
 .sidebar-item {
@@ -216,7 +225,7 @@ header {
     cursor: pointer;
     border: none;
     background: none;
-    color: #a0a0a0;
+    color: var(--text-muted);
     transition: var(--transition);
 }
 
@@ -227,14 +236,15 @@ header {
 .toggle-divider {
     width: 32px;
     height: 2px;
-    background-color: #c0c0c0;
+    background-color: var(--border-color);
     margin: 0 1rem;
 }
 
 .description-text {
     font-size: 1.02rem;
     line-height: 1.5;
-    color: #2b2b2b;
+    color: var(--text-main);
+    opacity: 0.8;
 }
 
 .timer-column {
@@ -280,6 +290,10 @@ header {
     background-color: #333333;
 }
 
+body[data-theme="dark"] .btn-primary:hover {
+    background-color: #e6e6e6;
+}
+
 .btn-secondary {
     background-color: transparent;
     color: var(--text-main);
@@ -308,7 +322,7 @@ header {
 }
 
 .stat-card.goal-met {
-    background-color: #f7f7f7;
+    background-color: var(--bg-color);
     border: 1px solid var(--text-main);
 }
 
@@ -367,7 +381,7 @@ header {
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 1.5px;
-    color: #888888;
+    color: var(--text-muted);
     text-transform: uppercase;
     margin-bottom: 3.5rem;
 }
@@ -395,8 +409,12 @@ header {
     animation: fadeIn 0.15s ease;
 }
 
+body[data-theme="dark"] .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
 .modal-content {
-    background-color: #ffffff;
+    background-color: var(--accent-gray);
     border: 1px solid var(--border-color);
     padding: 4rem;
     width: 100%;
