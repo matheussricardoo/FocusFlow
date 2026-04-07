@@ -16,6 +16,7 @@ where
     let (temp_sound, set_temp_sound) = create_signal(settings.sound_enabled.get());
     let (temp_sound_volume, set_temp_sound_volume) = create_signal(settings.sound_volume.get());
     let (temp_auto_start, set_temp_auto_start) = create_signal(settings.auto_start_next.get());
+    let (temp_theme_dark, set_temp_theme_dark) = create_signal(settings.theme_dark.get());
 
     let cancel = on_close.clone();
 
@@ -27,6 +28,7 @@ where
         settings.sound_enabled.set(temp_sound.get());
         settings.sound_volume.set(temp_sound_volume.get());
         settings.auto_start_next.set(temp_auto_start.get());
+        settings.theme_dark.set(temp_theme_dark.get());
         on_close();
     };
 
@@ -112,6 +114,18 @@ where
                             <input type="checkbox"
                                    on:change=move |ev| set_temp_auto_start.set(event_target_checked(&ev))
                                    prop:checked=temp_auto_start />
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group toggle-group">
+                    <div class="toggle-row">
+                        <span class="toggle-label">"DARK THEME"</span>
+                        <label class="switch">
+                            <input type="checkbox"
+                                   on:change=move |ev| set_temp_theme_dark.set(event_target_checked(&ev))
+                                   prop:checked=temp_theme_dark />
                             <span class="slider"></span>
                         </label>
                     </div>

@@ -42,6 +42,7 @@ pub struct PersistedSettings {
     pub sound_enabled: bool,
     pub sound_volume: f64,
     pub auto_start_next: bool,
+    pub theme_dark: bool,
 }
 
 impl Default for PersistedSettings {
@@ -54,6 +55,7 @@ impl Default for PersistedSettings {
             sound_enabled: true,
             sound_volume: 1.0,
             auto_start_next: false,
+            theme_dark: false,
         }
     }
 }
@@ -109,6 +111,7 @@ pub struct AppSettings {
     pub sound_enabled: RwSignal<bool>,
     pub sound_volume: RwSignal<f64>,
     pub auto_start_next: RwSignal<bool>,
+    pub theme_dark: RwSignal<bool>,
 }
 
 #[derive(Clone, Copy)]
@@ -398,6 +401,7 @@ pub fn App() -> impl IntoView {
     let sound_enabled = create_rw_signal(initial_settings.sound_enabled);
     let sound_volume = create_rw_signal(initial_settings.sound_volume);
     let auto_start_next = create_rw_signal(initial_settings.auto_start_next);
+    let theme_dark = create_rw_signal(initial_settings.theme_dark);
 
     let settings = AppSettings {
         focus_mins,
@@ -407,8 +411,21 @@ pub fn App() -> impl IntoView {
         sound_enabled,
         sound_volume,
         auto_start_next,
+        theme_dark,
     };
     provide_context(settings);
+
+    create_effect(move |_| {
+        let Some(win) = window() else { return };
+        let Some(doc) = win.document() else { return };
+        let Some(body) = doc.body() else { return };
+        let theme = if settings.theme_dark.get() {
+            "dark"
+        } else {
+            "light"
+        };
+        let _ = body.set_attribute("data-theme", theme);
+    });
 
     // Load Stats
     let initial_stats: PersistedStats = LocalStorage::get("focusflow_stats").unwrap_or_default();
@@ -491,6 +508,7 @@ pub fn App() -> impl IntoView {
         let s = sound_enabled.get();
         let v = sound_volume.get();
         let a = auto_start_next.get();
+        let t = theme_dark.get();
         let _ = LocalStorage::set(
             "focusflow_settings",
             PersistedSettings {
@@ -501,6 +519,7 @@ pub fn App() -> impl IntoView {
                 sound_enabled: s,
                 sound_volume: v,
                 auto_start_next: a,
+                theme_dark: t,
             },
         );
     });
