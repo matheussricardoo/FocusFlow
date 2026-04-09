@@ -30,10 +30,10 @@ jobs:
       - name: Setup Trunk
         uses: jetli/trunk-action@v0.5.0
         with:
-          version: 'latest'
+          version: "latest"
 
       - name: Build with Trunk
-        run: trunk build --release --public-url /FocusFlow/
+        run: trunk build --release --public-url /focusflow-web/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -41,7 +41,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: "./dist"
 
   deploy:
     environment:
